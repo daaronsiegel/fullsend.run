@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xdg-open:*)",
+      "Bash(explorer.exe:*)",
+      "Bash(wslpath:*)",
+      "Bash(powershell.exe -c \"Start-Process ''http://localhost:8000/directory.html''\")",
+      "Bash(curl:*)",
+      "Bash(powershell.exe -c \"Start-Process ''http://localhost:8000/admin-console.html''\")",
+      "WebSearch",
+      "WebFetch(domain:www.butzel.com)",
+      "Bash(npx:*)",
+      "Bash(powershell.exe -c \"Start-Process ''http://localhost:8000/index.html''\")",
+      "Bash(powershell.exe -c \"Start-Process ''http://localhost:8000/settings.html''\")",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(node --version:*)",
+      "Bash(npm --version:*)",
+      "Bash(python3:*)",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

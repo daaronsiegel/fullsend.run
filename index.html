@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Directory</title>
+    <link rel="stylesheet" href="styles-new.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="top-nav-content">
+            <div class="logo-text">Directory</div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="admin-console.html" class="nav-link">Admin</a>
+                <button class="export-all-btn" id="exportAllBtn">
+                    <span>⬇️</span> Export
+                </button>
+                <button class="btn-primary" id="addEmployeeBtn">+ Add Employee</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Employee Directory</h1>
+        <p>Connect with team members across the organization</p>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="search-panel">
+            <div class="search-grid">
+                <input type="text" id="searchName" class="search-input" placeholder="Search by name...">
+                <input type="text" id="searchOffice" class="search-input" placeholder="Search by office...">
+                <input type="text" id="searchManager" class="search-input" placeholder="Search by manager...">
+                <input type="text" id="searchDepartment" class="search-input" placeholder="Search by department...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All Employees</button>
+                <button class="filter-btn" data-filter="Engineering">Engineering</button>
+                <button class="filter-btn" data-filter="Sales">Sales</button>
+                <button class="filter-btn" data-filter="Marketing">Marketing</button>
+                <button class="filter-btn" data-filter="HR">HR</button>
+            </div>
+        </div>
+
+        <div class="results-info" id="resultsInfo"></div>
+        <div class="directory-grid" id="directoryGrid"></div>
+    </div>
+
+    <script type="module" src="dist/app.js"></script>
+</body>
+</html>
