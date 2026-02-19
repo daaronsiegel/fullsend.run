@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Drake_Jaxon live on Twitch" />
+  <title>DRAKE_JAXON · LIVE</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #04040f;
+      --surface:   #08081e;
+      --border:    #1a1a3e;
+      --cyan:      #00ffd1;
+      --purple:    #7c3aed;
+      --pink:      #ff006e;
+      --green:     #00ff88;
+      --text:      #c8c8ff;
+      --text-dim:  #44447a;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Mono', 'Courier New', monospace;
+      overflow: hidden;
+    }
+
+    /* Grid background */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 255, 209, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 209, 0.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Nav bar ── */
+    .nav {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      height: 48px;
+      border-bottom: 1px solid var(--border);
+      background: #04040fcc;
+      backdrop-filter: blur(8px);
+      flex-shrink: 0;
+    }
+
+    .nav-brand {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      color: var(--cyan);
+      text-decoration: none;
+      text-shadow: 0 0 12px #00ffd166;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.7rem;
+      border: 1px solid var(--pink);
+      border-radius: 2rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--pink);
+      text-shadow: 0 0 8px #ff006ecc;
+    }
+
+    .live-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--pink);
+      box-shadow: 0 0 6px var(--pink);
+      animation: blink 1.2s step-end infinite;
+    }
+
+    .offline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.7rem;
+      border: 1px solid var(--text-dim);
+      border-radius: 2rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+    }
+
+    .offline-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-dim);
+    }
+
+    .nav-link {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--cyan); }
+
+    /* ── Layout ── */
+    .layout {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      height: calc(100vh - 48px);
+    }
+
+    /* ── Stream panel ── */
+    .stream-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border-right: 1px solid var(--border);
+    }
+
+    .stream-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .streamer-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--purple);
+      box-shadow: 0 0 8px #7c3aed66;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      color: var(--cyan);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .streamer-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #fff;
+    }
+
+    .stream-game {
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      margin-top: 0.1rem;
+    }
+
+    .twitch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.8rem;
+      border: 1px solid var(--purple);
+      border-radius: 4px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--purple);
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .twitch-btn:hover {
+      background: var(--purple);
+      color: #fff;
+    }
+
+    .player-wrap {
+      flex: 1;
+      background: #000;
+      position: relative;
+    }
+
+    .player-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Offline screen */
+    .offline-screen {
+      display: none;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      background: #04040f;
+    }
+
+    .offline-screen.visible { display: flex; }
+
+    .offline-icon {
+      font-size: 3rem;
+      opacity: 0.3;
+    }
+
+    .offline-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+    }
+
+    .offline-sub {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      opacity: 0.6;
+    }
+
+    /* ── Chat panel ── */
+    .chat-panel {
+      width: 340px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .chat-panel iframe {
+      flex: 1;
+      border: none;
+      background: var(--bg);
+      min-height: 0;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.1; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .chat-panel { display: none; }
+      html, body { overflow: auto; }
+      .layout { flex-direction: column; height: auto; }
+      .stream-panel { min-height: 56vw; }
+      .player-wrap { min-height: 56vw; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-brand" href="/">FULLSEND.RUN</a>
+    <div class="nav-right">
+      <span class="live-badge" id="status-badge">
+        <span class="live-dot"></span>LIVE
+      </span>
+      <a class="nav-link" href="https://twitch.tv/Drake_Jaxon" target="_blank" rel="noopener">TWITCH ↗</a>
+      <a class="nav-link" href="/">← COUNTDOWN</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+
+    <!-- Stream -->
+    <div class="stream-panel">
+      <div class="stream-header">
+        <div class="streamer-info">
+          <div class="avatar">DJ</div>
+          <div>
+            <div class="streamer-name">DRAKE_JAXON</div>
+            <div class="stream-game">LIVE ON TWITCH</div>
+          </div>
+        </div>
+        <a class="twitch-btn" href="https://twitch.tv/Drake_Jaxon" target="_blank" rel="noopener">
+          ▶ TWITCH
+        </a>
+      </div>
+
+      <div class="player-wrap">
+        <iframe
+          id="twitch-player"
+          allowfullscreen
+          src=""
+        ></iframe>
+        <div class="offline-screen" id="offline-screen">
+          <div class="offline-icon">📡</div>
+          <div class="offline-title">STREAM OFFLINE</div>
+          <div class="offline-sub">DRAKE_JAXON IS NOT LIVE RIGHT NOW</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-panel">
+      <div class="chat-header">LIVE CHAT</div>
+      <iframe id="twitch-chat" src="" scrolling="yes"></iframe>
+    </div>
+
+  </div>
+
+  <script>
+    // Dynamically set the parent domain so it works on localhost AND fullsend.run
+    const host = window.location.hostname;
+    const channel = 'Drake_Jaxon';
+
+    document.getElementById('twitch-player').src =
+      `https://player.twitch.tv/?channel=${channel}&parent=${host}&autoplay=true&muted=false`;
+
+    document.getElementById('twitch-chat').src =
+      `https://www.twitch.tv/embed/${channel}/chat?parent=${host}&darkpopout`;
+  </script>
+
+</body>
+</html>
