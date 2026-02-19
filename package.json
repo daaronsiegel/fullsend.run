@@ -1,0 +1,13 @@
+{
+  "name": "friday-countdown",
+  "version": "1.0.0",
+  "description": "Live digital countdown to Friday",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "tsc && npx serve ."
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

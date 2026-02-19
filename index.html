@@ -1,52 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Directory</title>
-    <link rel="stylesheet" href="styles-new.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Live countdown to Friday. Resets every Saturday at 12:01 AM." />
+  <title>COUNTDOWN TO FRIDAY</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <nav class="top-nav">
-        <div class="top-nav-content">
-            <div class="logo-text">Directory</div>
-            <div class="nav-links">
-                <a href="index.html" class="nav-link">Home</a>
-                <a href="admin-console.html" class="nav-link">Admin</a>
-                <button class="export-all-btn" id="exportAllBtn">
-                    <span>⬇️</span> Export
-                </button>
-                <button class="btn-primary" id="addEmployeeBtn">+ Add Employee</button>
-            </div>
-        </div>
-    </nav>
 
-    <div class="hero">
-        <h1>Employee Directory</h1>
-        <p>Connect with team members across the organization</p>
+  <!-- Particle background -->
+  <canvas id="particles"></canvas>
+
+  <!-- CRT scanline overlay -->
+  <div class="scanlines"></div>
+
+  <main class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="badge" id="badge">LIVE</div>
+      <h1 id="headline">COUNTDOWN TO FRIDAY</h1>
+      <p id="subheadline">THE WEEKEND IS LOADING...</p>
+    </header>
+
+    <!-- Clock -->
+    <div class="clock-grid" id="countdown-container">
+
+      <div class="clock-unit">
+        <div class="digit-display">
+          <span class="ghost">88</span>
+          <span class="digit" id="days-val">00</span>
+        </div>
+        <span class="unit-label">Days</span>
+      </div>
+
+      <div class="clock-divider">
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
+      <div class="clock-unit">
+        <div class="digit-display">
+          <span class="ghost">88</span>
+          <span class="digit" id="hours-val">00</span>
+        </div>
+        <span class="unit-label">Hours</span>
+      </div>
+
+      <div class="clock-divider">
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
+      <div class="clock-unit">
+        <div class="digit-display">
+          <span class="ghost">88</span>
+          <span class="digit" id="minutes-val">00</span>
+        </div>
+        <span class="unit-label">Minutes</span>
+      </div>
+
+      <div class="clock-divider">
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
+      <div class="clock-unit">
+        <div class="digit-display">
+          <span class="ghost">88</span>
+          <span class="digit" id="seconds-val">00</span>
+        </div>
+        <span class="unit-label">Seconds</span>
+      </div>
+
     </div>
 
-    <div class="content-wrapper">
-        <div class="search-panel">
-            <div class="search-grid">
-                <input type="text" id="searchName" class="search-input" placeholder="Search by name...">
-                <input type="text" id="searchOffice" class="search-input" placeholder="Search by office...">
-                <input type="text" id="searchManager" class="search-input" placeholder="Search by manager...">
-                <input type="text" id="searchDepartment" class="search-input" placeholder="Search by department...">
-            </div>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">All Employees</button>
-                <button class="filter-btn" data-filter="Engineering">Engineering</button>
-                <button class="filter-btn" data-filter="Sales">Sales</button>
-                <button class="filter-btn" data-filter="Marketing">Marketing</button>
-                <button class="filter-btn" data-filter="HR">HR</button>
-            </div>
-        </div>
+    <!-- Progress bar -->
+    <section class="progress-section">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <p class="progress-label" id="progress-label">0.0% OF THE WEEK GONE · HANG TIGHT</p>
+    </section>
 
-        <div class="results-info" id="resultsInfo"></div>
-        <div class="directory-grid" id="directoryGrid"></div>
-    </div>
+    <!-- Footer -->
+    <footer class="footer-info">
+      <div class="status-dot"></div>
+      <span>SYSTEM ONLINE &nbsp;·&nbsp; LIVE REFRESH &nbsp;·&nbsp; RESETS SAT 12:01 AM</span>
+    </footer>
 
-    <script type="module" src="dist/app.js"></script>
+  </main>
+
+  <script src="dist/countdown.js"></script>
 </body>
 </html>

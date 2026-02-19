@@ -1,0 +1,460 @@
+/* ── Reset & Base ─────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Design Tokens ───────────────────────────────────────────── */
+
+:root {
+  --bg:        #04040f;
+  --surface:   #08081e;
+  --surface-2: #0d0d2a;
+  --border:    #1a1a3e;
+
+  --cyan:      #00ffd1;
+  --purple:    #7c3aed;
+  --pink:      #ff006e;
+  --blue:      #0099ff;
+  --green:     #00ff88;
+
+  --text:      #c8c8ff;
+  --text-dim:  #44447a;
+
+  --glow-cyan:   0 0 8px #00ffd1cc, 0 0 24px #00ffd155, 0 0 60px #00ffd122;
+  --glow-purple: 0 0 8px #7c3aedcc, 0 0 24px #7c3aed55, 0 0 60px #7c3aed22;
+  --glow-pink:   0 0 8px #ff006ecc, 0 0 24px #ff006e55, 0 0 60px #ff006e22;
+
+  --digit-size: clamp(2.8rem, 8vw, 7rem);
+  --unit-gap:   clamp(0.5rem, 2vw, 2rem);
+}
+
+/* ── Body & Background ───────────────────────────────────────── */
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Space Mono', 'Courier New', monospace;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  position: relative;
+  transition: background 1s ease;
+}
+
+/* Radial gradient glow in the center */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 60%, #7c3aed12 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 40%, #00ffd10a 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Friday mode: shift glow to pink/gold */
+body.friday-mode {
+  background: #06040f;
+}
+body.friday-mode::before {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 60%, #ff006e18 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 40%, #ffaa0010 0%, transparent 60%);
+}
+
+/* ── Particles canvas ────────────────────────────────────────── */
+
+#particles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Scanlines ───────────────────────────────────────────────── */
+
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.08) 3px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+}
+
+/* ── Main container ──────────────────────────────────────────── */
+
+.container {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
+  padding: clamp(1rem, 4vw, 3rem);
+  width: min(96vw, 1100px);
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.9rem;
+  border: 1px solid var(--pink);
+  border-radius: 2rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--pink);
+  text-shadow: var(--glow-pink);
+  box-shadow: var(--glow-pink);
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pink);
+  box-shadow: 0 0 6px var(--pink);
+  animation: dot-blink 1.2s step-end infinite;
+}
+
+.badge.friday-badge {
+  border-color: #ffd700;
+  color: #ffd700;
+  text-shadow: 0 0 8px #ffd700cc, 0 0 24px #ffd70055;
+  box-shadow: 0 0 8px #ffd700cc, 0 0 24px #ffd70055;
+}
+.badge.friday-badge::before {
+  background: #ffd700;
+  box-shadow: 0 0 6px #ffd700;
+}
+
+h1#headline {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.4rem, 5vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-shadow:
+    0 0 10px #fff8,
+    0 0 30px var(--cyan),
+    0 0 80px var(--cyan);
+  line-height: 1.1;
+  transition: text-shadow 1s ease, color 1s ease;
+}
+
+body.friday-mode h1#headline {
+  color: #ffd700;
+  text-shadow:
+    0 0 10px #fff8,
+    0 0 30px #ffd700,
+    0 0 80px #ff8c00;
+}
+
+#subheadline {
+  font-size: clamp(0.6rem, 1.8vw, 0.9rem);
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── Clock grid ──────────────────────────────────────────────── */
+
+.clock-grid {
+  display: flex;
+  align-items: center;
+  gap: var(--unit-gap);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── Individual unit ─────────────────────────────────────────── */
+
+.clock-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.digit-display {
+  position: relative;
+  background:
+    linear-gradient(160deg, #0d0d28 0%, #050514 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: clamp(0.6rem, 2vw, 1.4rem) clamp(0.8rem, 2.5vw, 1.8rem);
+  min-width: clamp(80px, 18vw, 180px);
+  text-align: center;
+  overflow: hidden;
+
+  /* Glowing top edge */
+  box-shadow:
+    0 0 0 1px #ffffff08 inset,
+    0 1px 0 0 var(--cyan) inset,
+    0 0 30px #00ffd110,
+    0 4px 40px #0004;
+
+  transition: box-shadow 1s ease;
+}
+
+body.friday-mode .digit-display {
+  box-shadow:
+    0 0 0 1px #ffffff08 inset,
+    0 1px 0 0 #ffd700 inset,
+    0 0 30px #ffd70018,
+    0 4px 40px #0004;
+}
+
+/* Corner accents */
+.digit-display::before,
+.digit-display::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: var(--cyan);
+  border-style: solid;
+  opacity: 0.6;
+  transition: border-color 1s ease;
+}
+.digit-display::before {
+  top: 6px; left: 6px;
+  border-width: 1px 0 0 1px;
+}
+.digit-display::after {
+  bottom: 6px; right: 6px;
+  border-width: 0 1px 1px 0;
+}
+
+body.friday-mode .digit-display::before,
+body.friday-mode .digit-display::after {
+  border-color: #ffd700;
+}
+
+/* The digit number itself */
+.digit {
+  display: block;
+  font-family: 'Orbitron', monospace;
+  font-size: var(--digit-size);
+  font-weight: 900;
+  color: var(--cyan);
+  text-shadow: var(--glow-cyan);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  transition: color 1s ease, text-shadow 1s ease;
+  will-change: transform;
+}
+
+body.friday-mode .digit {
+  color: #ffd700;
+  text-shadow: 0 0 8px #ffd700cc, 0 0 24px #ffd70055, 0 0 60px #ff8c0022;
+}
+
+/* Flip animation when digit changes */
+@keyframes flip {
+  0%   { transform: translateY(-6px) scaleY(0.85); opacity: 0.4; }
+  60%  { transform: translateY(2px) scaleY(1.04); opacity: 1; }
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+
+.digit.flip {
+  animation: flip 0.22s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Ghost digit behind — adds LCD depth */
+.digit-display .ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-size: var(--digit-size);
+  font-weight: 900;
+  color: var(--cyan);
+  opacity: 0.04;
+  letter-spacing: -0.02em;
+  pointer-events: none;
+  user-select: none;
+}
+
+.unit-label {
+  font-size: clamp(0.5rem, 1.4vw, 0.7rem);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  transition: color 1s ease;
+}
+
+body.friday-mode .unit-label {
+  color: #8a7020;
+}
+
+/* ── Divider colons ──────────────────────────────────────────── */
+
+.clock-divider {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 2rem;
+  opacity: 0.6;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--purple);
+  box-shadow: var(--glow-purple);
+  animation: dot-blink 1s step-end infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.5s; }
+
+/* ── Progress section ────────────────────────────────────────── */
+
+.progress-section {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+  box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--purple);
+  transition: width 1s linear, background 1s ease, box-shadow 1s ease;
+  position: relative;
+}
+
+/* Shimmer sweep on progress bar */
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, #ffffff30 50%, transparent 100%);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+body.friday-mode .progress-fill {
+  background: linear-gradient(90deg, #ff8c00, #ffd700);
+  box-shadow: 0 0 10px #ffd700, 0 0 20px #ff8c00;
+}
+
+.progress-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ── Footer ──────────────────────────────────────────────────── */
+
+.footer-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: dot-blink 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────── */
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
+
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.75; }
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+/* ── Friday celebration extras ───────────────────────────────── */
+
+.friday-mode .clock-divider .dot {
+  background: #ffd700;
+  box-shadow: 0 0 8px #ffd700cc, 0 0 24px #ffd70055;
+}
+
+/* ── Responsive tweaks ───────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .clock-divider { display: none; }
+
+  .clock-grid {
+    gap: 0.6rem;
+  }
+
+  .digit-display {
+    min-width: 70px;
+  }
+}
+
+@media (max-width: 400px) {
+  .clock-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
