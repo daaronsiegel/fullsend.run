@@ -353,15 +353,15 @@
   </div>
 
   <script>
-    // Dynamically set the parent domain so it works on localhost AND fullsend.run
-    const host = window.location.hostname;
     const channel = 'Drake_Jaxon';
+    // Include all parent domains so embed works on prod and localhost
+    const parents = 'parent=fullsend.run&parent=www.fullsend.run&parent=localhost&parent=127.0.0.1';
 
     document.getElementById('twitch-player').src =
-      `https://player.twitch.tv/?channel=${channel}&parent=${host}&autoplay=true&muted=false`;
+      `https://player.twitch.tv/?channel=${channel}&${parents}&autoplay=true`;
 
     document.getElementById('twitch-chat').src =
-      `https://www.twitch.tv/embed/${channel}/chat?parent=${host}&darkpopout`;
+      `https://www.twitch.tv/embed/${channel}/chat?${parents}&darkpopout`;
   </script>
 
 </body>
