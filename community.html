@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="FULLSEND community board" />
+  <title>FULLSEND // COMMUNITY</title>
+
+  <script>
+    // Admin session check
+    const ADMIN_KEY = 'fs_admin_exp';
+    function isAdmin() {
+      const exp = localStorage.getItem(ADMIN_KEY);
+      if (!exp) return false;
+      if (Date.now() > parseInt(exp)) { localStorage.removeItem(ADMIN_KEY); return false; }
+      return true;
+    }
+    // Only accessible on Fridays (or with active admin session)
+    if (new Date().getDay() !== 5 && !isAdmin()) {
+      location.replace('index.html');
+    }
+    window._isAdmin = isAdmin();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button { font: inherit; cursor: pointer; }
+    textarea, input { font: inherit; }
+
+    :root {
+      --bg:        #06060f;
+      --surface:   #0e0e1e;
+      --surface-2: #141428;
+      --border:    #1e1e40;
+      --border-2:  #2c2c58;
+
+      --cyan:   #00ffd1;
+      --purple: #7c3aed;
+      --pink:   #ff006e;
+      --green:  #00ff88;
+
+      --text:     #e2e2f8;
+      --text-mid: #9898c8;
+      --text-dim: #50508a;
+    }
+
+    html { height: 100%; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* subtle grid overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,209,0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,209,0.012) 1px, transparent 1px);
+      background-size: 64px 64px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Nav ────────────────────────────────────────── */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(6,6,15,0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .nav-brand {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      text-shadow: 0 0 10px #00ffd199;
+      text-decoration: none;
+    }
+
+    .nav-sep { width: 1px; height: 16px; background: var(--border-2); }
+
+    .nav-section {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .nav-back {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 0.35rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-back:hover { color: var(--cyan); border-color: var(--cyan); }
+
+    /* ── Page ───────────────────────────────────────── */
+    .page-wrap {
+      position: relative;
+      z-index: 10;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2rem 1rem 5rem;
+    }
+
+    .page-header {
+      margin-bottom: 1.75rem;
+    }
+    .page-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      color: #fff;
+      text-shadow: 0 0 24px #7c3aed66;
+      margin-bottom: 0.3rem;
+    }
+    .page-sub {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    /* ── Compose ────────────────────────────────────── */
+    .compose-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+.compose-text {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      margin-bottom: 0.75rem;
+      transition: border-color 0.2s;
+    }
+    .compose-text::placeholder { color: var(--text-dim); }
+    .compose-text:focus { border-color: var(--purple); }
+
+    .compose-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-post {
+      background: var(--purple);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-post:hover { background: #8b47ff; box-shadow: 0 0 18px #7c3aed55; }
+    .btn-post:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+
+    /* ── Feed ───────────────────────────────────────── */
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* ── Post Card ──────────────────────────────────── */
+    .post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem 0.85rem;
+      transition: border-color 0.2s;
+      animation: fadeUp 0.3s ease both;
+    }
+    .post-card:hover { border-color: var(--border-2); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+
+    .post-time {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .admin-delete-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      line-height: 1;
+    }
+    .admin-delete-btn:hover {
+      color: var(--pink);
+      border-color: var(--pink);
+      background: #ff006e12;
+    }
+
+    .post-body {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--text-mid);
+      margin-bottom: 0.85rem;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    /* ── Reactions ──────────────────────────────────── */
+    .reactions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .reaction-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.28rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.22rem 0.55rem;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      transition: border-color 0.15s, color 0.15s, transform 0.1s;
+      user-select: none;
+    }
+    .reaction-btn:hover {
+      border-color: var(--border-2);
+      color: var(--text);
+      transform: scale(1.06);
+    }
+    .reaction-btn.active {
+      border-color: var(--purple);
+      background: #7c3aed1a;
+      color: var(--text);
+    }
+    .reaction-emoji { font-size: 0.9rem; line-height: 1; }
+    .reaction-count { font-size: 0.72rem; font-weight: 600; }
+
+    /* Add reaction button */
+    .add-reaction-wrap { position: relative; }
+
+    .add-reaction {
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 20px;
+      padding: 0.22rem 0.6rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .add-reaction:hover { border-color: var(--border-2); color: var(--text); }
+
+    /* Emoji picker popup */
+    .emoji-picker {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      border-radius: 10px;
+      padding: 0.45rem 0.5rem;
+      display: flex;
+      gap: 0.15rem;
+      z-index: 50;
+      box-shadow: 0 8px 24px #00000077;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(4px);
+      transition: opacity 0.15s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .emoji-picker.open {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .emoji-pick-btn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      padding: 0.2rem 0.3rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s, transform 0.1s;
+      line-height: 1;
+    }
+    .emoji-pick-btn:hover { background: var(--surface); transform: scale(1.2); }
+
+    /* ── Empty state ────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .empty-icon { font-size: 2.5rem; opacity: 0.35; }
+    .empty-text { font-size: 0.85rem; color: var(--text-dim); }
+
+    /* ── Scrollbar ──────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--purple); }
+
+    /* ── Friday Countdown Bar ───────────────────────── */
+    .friday-bar {
+      position: relative;
+      z-index: 90;
+      background: #0a0a1e;
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .friday-bar.active {
+      background: linear-gradient(90deg, #0a0a1e 0%, #120a28 50%, #0a0a1e 100%);
+      border-color: #2a1a5e;
+    }
+
+    .friday-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .friday-bar.active .friday-label {
+      color: var(--cyan);
+      text-shadow: 0 0 8px #00ffd166;
+    }
+
+    .friday-clock {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .friday-bar.active .friday-clock {
+      color: #fff;
+      text-shadow: 0 0 12px #00ffd188, 0 0 28px #7c3aed66;
+    }
+
+    .friday-clock .seg { display: inline-block; }
+    .friday-clock .colon {
+      opacity: 0.5;
+      animation: colonBlink 1s step-end infinite;
+      display: inline-block;
+      width: 0.6ch;
+      text-align: center;
+    }
+    @keyframes colonBlink {
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 0.1; }
+    }
+
+    .friday-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .friday-bar.active .friday-dot {
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
+    }
+
+    /* ── Mobile ─────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .page-wrap { padding: 1.25rem 0.75rem 3rem; }
+      .page-title { font-size: 1.2rem; }
+      .post-time { display: none; }
+      .nav-section { display: none; }
+      .friday-label { display: none; }
+      .friday-clock { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="nav-left">
+    <a href="index.html" class="nav-brand">FULLSEND</a>
+    <div class="nav-sep"></div>
+    <span class="nav-section">Community</span>
+  </div>
+  <div id="admin-nav" style="display:none; align-items:center; gap:0.6rem;">
+    <span style="font-family:'Orbitron',monospace; font-size:0.5rem; letter-spacing:0.2em; color:#7c3aed; text-shadow:0 0 8px #7c3aed88;">ADMIN</span>
+    <button id="admin-logout" style="
+      background:none; border:1px solid #1e1e40; border-radius:5px;
+      color:#50508a; font-size:0.7rem; padding:0.25rem 0.65rem; cursor:pointer;
+      transition:color 0.15s, border-color 0.15s;
+    ">logout</button>
+  </div>
+</nav>
+
+<!-- Friday Countdown Bar -->
+<div class="friday-bar" id="friday-bar">
+  <div class="friday-dot" id="friday-dot"></div>
+  <span class="friday-label" id="friday-label">Friday ends in</span>
+  <div class="friday-clock" id="friday-clock">--:--:--</div>
+</div>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <h1 class="page-title">THE BOARD</h1>
+    <p class="page-sub">Post something you fullsent.</p>
+  </div>
+
+  <!-- Compose -->
+  <div class="compose-box">
+    <textarea class="compose-text" id="compose-text" placeholder="What's on your mind?" maxlength="500"></textarea>
+    <div class="compose-row">
+      <button class="btn-post" id="submit-btn" disabled>Post</button>
+    </div>
+  </div>
+
+  <!-- Feed -->
+  <div class="feed" id="feed"></div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'fullsend_community_v4';
+const EMOJIS = ['🔥', '👍', '😂', '💀', '👀', '🤙', '💯'];
+
+const SEED_POSTS = [];
+
+let posts = [];
+
+function loadPosts() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data && data.length > 0) return data;
+    }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(SEED_POSTS));
+}
+
+function savePosts() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(posts)); } catch(e) {}
+}
+
+function relTime(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+
+function renderFeed() {
+  const feed = document.getElementById('feed');
+  const sorted = [...posts].sort((a, b) => b.ts - a.ts);
+
+  if (sorted.length === 0) {
+    feed.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <div class="empty-text">Nothing here yet. Be first.</div>
+      </div>`;
+    return;
+  }
+
+  feed.innerHTML = '';
+  sorted.forEach((post, i) => {
+    feed.appendChild(createCard(post, i));
+  });
+}
+
+function createCard(post, index) {
+  const card = document.createElement('div');
+  card.className = 'post-card';
+  card.style.animationDelay = `${Math.min(index * 0.04, 0.3)}s`;
+  card.dataset.id = post.id;
+
+  const reactionEntries = Object.entries(post.reactions || {}).filter(([, c]) => c > 0);
+  const userReactions = post.userReactions || [];
+
+  const reactionsHtml = reactionEntries.map(([emoji, count]) => `
+    <button class="reaction-btn${userReactions.includes(emoji) ? ' active' : ''}" data-emoji="${esc(emoji)}">
+      <span class="reaction-emoji">${emoji}</span>
+      <span class="reaction-count">${count}</span>
+    </button>
+  `).join('');
+
+  const emojiPickerHtml = EMOJIS.map(e =>
+    `<button class="emoji-pick-btn" data-emoji="${e}">${e}</button>`
+  ).join('');
+
+  const deleteBtn = window._isAdmin
+    ? `<button class="admin-delete-btn" title="Delete post">✕</button>`
+    : '';
+
+  card.innerHTML = `
+    <div class="post-meta">
+      <span class="post-time">${relTime(post.ts)}</span>
+      ${deleteBtn}
+    </div>
+    <div class="post-body">${esc(post.text)}</div>
+    <div class="reactions">
+      ${reactionsHtml}
+      <div class="add-reaction-wrap">
+        <button class="add-reaction">+ emoji</button>
+        <div class="emoji-picker">${emojiPickerHtml}</div>
+      </div>
+    </div>`;
+
+  if (window._isAdmin) {
+    card.querySelector('.admin-delete-btn').addEventListener('click', () => deletePost(post.id));
+  }
+
+  // Reaction click handlers
+  card.querySelectorAll('.reaction-btn').forEach(btn => {
+    btn.addEventListener('click', () => toggleReaction(post.id, btn.dataset.emoji));
+  });
+
+  // Add-reaction toggle
+  const addBtn = card.querySelector('.add-reaction');
+  const picker = card.querySelector('.emoji-picker');
+
+  addBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    // close any other open pickers
+    document.querySelectorAll('.emoji-picker.open').forEach(p => {
+      if (p !== picker) p.classList.remove('open');
+    });
+    picker.classList.toggle('open');
+  });
+
+  picker.querySelectorAll('.emoji-pick-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      picker.classList.remove('open');
+      toggleReaction(post.id, btn.dataset.emoji);
+    });
+  });
+
+  return card;
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.emoji-picker.open').forEach(p => p.classList.remove('open'));
+});
+
+function toggleReaction(postId, emoji) {
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  if (!post.reactions) post.reactions = {};
+  if (!post.userReactions) post.userReactions = [];
+
+  const idx = post.userReactions.indexOf(emoji);
+  if (idx !== -1) {
+    post.userReactions.splice(idx, 1);
+    post.reactions[emoji] = Math.max(0, (post.reactions[emoji] || 1) - 1);
+    if (post.reactions[emoji] === 0) delete post.reactions[emoji];
+  } else {
+    post.userReactions.push(emoji);
+    post.reactions[emoji] = (post.reactions[emoji] || 0) + 1;
+  }
+
+  savePosts();
+
+  // Replace just this card
+  const oldCard = document.querySelector(`[data-id="${postId}"]`);
+  if (oldCard) {
+    const newCard = createCard(post, 0);
+    newCard.style.animation = 'none';
+    oldCard.replaceWith(newCard);
+  }
+}
+
+// Compose
+const composeText = document.getElementById('compose-text');
+const submitBtn = document.getElementById('submit-btn');
+
+composeText.addEventListener('input', () => {
+  submitBtn.disabled = composeText.value.trim().length < 2;
+});
+
+submitBtn.addEventListener('click', () => {
+  const text = composeText.value.trim();
+  if (text.length < 2) return;
+
+  const post = {
+    id: 'post-' + Date.now(),
+    text,
+    ts: Date.now(),
+    reactions: {},
+    userReactions: [],
+  };
+
+  posts.unshift(post);
+  savePosts();
+
+  composeText.value = '';
+  submitBtn.disabled = true;
+
+  renderFeed();
+});
+
+function deletePost(id) {
+  posts = posts.filter(p => p.id !== id);
+  savePosts();
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if (card) {
+    card.style.transition = 'opacity 0.2s, transform 0.2s';
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(12px)';
+    setTimeout(() => { card.remove(); if (!posts.length) renderFeed(); }, 200);
+  }
+}
+
+// ── Friday Countdown ──────────────────────────────────────────
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function updateFridayClock() {
+  const bar    = document.getElementById('friday-bar');
+  const label  = document.getElementById('friday-label');
+  const clock  = document.getElementById('friday-clock');
+
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun … 5=Fri … 6=Sat
+
+  if (day !== 5) {
+    // Not Friday — clock stays dormant
+    bar.classList.remove('active');
+    label.textContent = 'Board opens Friday 12 AM';
+    clock.innerHTML = '--<span class="colon">:</span>--<span class="colon">:</span>--';
+    return;
+  }
+
+  // It's Friday — count down to Saturday 12:00:00 AM
+  bar.classList.add('active');
+  label.textContent = 'Board closes in';
+
+  const endOfFriday = new Date(now);
+  endOfFriday.setHours(24, 0, 0, 0); // next midnight (Saturday 00:00:00)
+
+  const remaining = Math.max(0, endOfFriday - now);
+  const totalSec  = Math.floor(remaining / 1000);
+  const h  = Math.floor(totalSec / 3600);
+  const m  = Math.floor((totalSec % 3600) / 60);
+  const s  = totalSec % 60;
+
+  clock.innerHTML =
+    `<span class="seg">${pad(h)}</span>` +
+    `<span class="colon">:</span>` +
+    `<span class="seg">${pad(m)}</span>` +
+    `<span class="colon">:</span>` +
+    `<span class="seg">${pad(s)}</span>`;
+}
+
+updateFridayClock();
+setInterval(updateFridayClock, 1000);
+
+// Boot
+posts = loadPosts();
+renderFeed();
+
+// Admin UI
+if (window._isAdmin) {
+  const adminNav = document.getElementById('admin-nav');
+  adminNav.style.display = 'flex';
+  document.getElementById('admin-logout').addEventListener('click', () => {
+    localStorage.removeItem('fs_admin_exp');
+    location.href = 'index.html';
+  });
+}
+</script>
+</body>
+</html>

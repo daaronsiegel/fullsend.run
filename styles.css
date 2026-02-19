@@ -507,6 +507,57 @@ body.friday-mode .sys-val { color: #ffd700; }
   100% { transform: translateX(300%); }
 }
 
+/* ── Watch Live Button ───────────────────────────────────────── */
+
+.watch-live-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--pink);
+  text-decoration: none;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  letter-spacing: 0.18em;
+  padding: 0.65rem 1.75rem;
+  border: 1px solid var(--pink);
+  border-radius: 6px;
+  box-shadow: var(--glow-pink);
+  text-shadow: var(--glow-pink);
+  transition: background 0.2s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.watch-live-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, #ff006e14 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: wl-sweep 2.5s ease-in-out infinite;
+}
+
+@keyframes wl-sweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.watch-live-btn:hover {
+  background: #ff006e18;
+  box-shadow: 0 0 24px #ff006ecc, 0 0 48px #ff006e44;
+}
+
+.wl-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pink);
+  box-shadow: 0 0 6px var(--pink);
+  animation: dot-blink 1.2s step-end infinite;
+  flex-shrink: 0;
+}
+
 /* ── Friday celebration extras ───────────────────────────────── */
 
 .friday-mode .clock-divider .dot {
