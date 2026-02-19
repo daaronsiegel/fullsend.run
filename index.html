@@ -27,7 +27,10 @@
     <header class="header">
       <div class="badge" id="badge">LIVE</div>
       <h1 id="headline">COUNTDOWN TO FRIDAY</h1>
-      <p id="subheadline">THE WEEKEND IS LOADING...</p>
+      <div class="terminal-line">
+        <span class="terminal-prompt">&gt;_</span>
+        <span id="terminal-text"></span><span class="cursor-blink">█</span>
+      </div>
     </header>
 
     <!-- Clock -->
@@ -89,6 +92,17 @@
       </div>
       <p class="progress-label" id="progress-label">0.0% OF THE WEEK GONE · HANG TIGHT</p>
     </section>
+
+    <!-- System readout -->
+    <div class="sys-readout">
+      <span class="sys-item"><span class="sys-key">SYS_TIME</span><span class="sys-val" id="utc-time">--:--:--Z</span></span>
+      <span class="sys-sep">·</span>
+      <span class="sys-item"><span class="sys-key">DATE</span><span class="sys-val" id="utc-date">----.--.--</span></span>
+      <span class="sys-sep">·</span>
+      <span class="sys-item"><span class="sys-key">WEEK</span><span class="sys-val" id="week-num">--/52</span></span>
+      <span class="sys-sep">·</span>
+      <span class="sys-item"><span class="sys-key">NODE</span><span class="sys-val">FULLSEND-01</span></span>
+    </div>
 
     <!-- Footer -->
     <footer class="footer-info">

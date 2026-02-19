@@ -67,22 +67,98 @@ function updateDigit(id, value) {
 function setFridayMode(active) {
   const body = document.body;
   const headline = document.getElementById('headline');
-  const sub = document.getElementById('subheadline');
   const badge = document.getElementById('badge');
 
   if (active) {
     body.classList.add('friday-mode');
     headline.textContent = "IT'S FRIDAY!";
-    sub.textContent = 'THE WEEKEND HAS ARRIVED · ENJOY IT';
     badge.textContent = '🎉 FRIDAY';
     badge.classList.add('friday-badge');
   } else {
     body.classList.remove('friday-mode');
     headline.textContent = 'COUNTDOWN TO FRIDAY';
-    sub.textContent = 'THE WEEKEND IS LOADING...';
     badge.textContent = 'LIVE';
     badge.classList.remove('friday-badge');
   }
+}
+
+// ── Terminal cycling messages ─────────────────────────────────
+
+const TERMINAL_MSGS = [
+  'SCANNING CALENDAR MATRIX...',
+  'FRIDAY.SYS: ARMED AND READY',
+  'TEMPORAL SEQUENCE LOCKED',
+  'WEEKEND PROTOCOL: STANDBY',
+  'SYNCHRONIZING UTC CLOCK...',
+  'COUNTDOWN SEQUENCE: ACTIVE',
+  'NETWORK NODE: FULLSEND-01',
+  'SIGNAL INTEGRITY: 100%',
+];
+
+const TERMINAL_MSGS_FRIDAY = [
+  'FRIDAY PROTOCOL: ACTIVATED',
+  'WEEKEND SUBROUTINE: RUNNING',
+  'WORK PROCESSES TERMINATED',
+  'REST.EXE INITIALIZED',
+  'ENJOY_WEEKEND.SH EXECUTING',
+  'STANDBY FOR MONDAY REBOOT',
+];
+
+let terminalIndex = 0;
+let terminalTyping = false;
+
+function typeMessage(text) {
+  if (terminalTyping) return;
+  terminalTyping = true;
+  const el = document.getElementById('terminal-text');
+  el.textContent = '';
+  let i = 0;
+  const interval = setInterval(() => {
+    el.textContent += text[i++];
+    if (i >= text.length) {
+      clearInterval(interval);
+      terminalTyping = false;
+    }
+  }, 38);
+}
+
+function initTerminal(isFriday) {
+  const msgs = isFriday ? TERMINAL_MSGS_FRIDAY : TERMINAL_MSGS;
+  typeMessage(msgs[terminalIndex % msgs.length]);
+  terminalIndex++;
+  setInterval(() => {
+    const m = isFriday ? TERMINAL_MSGS_FRIDAY : TERMINAL_MSGS;
+    typeMessage(m[terminalIndex % m.length]);
+    terminalIndex++;
+  }, 4000);
+}
+
+// ── UTC system readout ────────────────────────────────────────
+
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+
+function tickSysReadout() {
+  const now = new Date();
+  const hh = String(now.getUTCHours()).padStart(2, '0');
+  const mm = String(now.getUTCMinutes()).padStart(2, '0');
+  const ss = String(now.getUTCSeconds()).padStart(2, '0');
+  const yyyy = now.getUTCFullYear();
+  const mo = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(now.getUTCDate()).padStart(2, '0');
+  const wk = String(getWeekNumber(now)).padStart(2, '0');
+
+  const timeEl = document.getElementById('utc-time');
+  const dateEl = document.getElementById('utc-date');
+  const weekEl = document.getElementById('week-num');
+  if (timeEl) timeEl.textContent = `${hh}:${mm}:${ss}Z`;
+  if (dateEl) dateEl.textContent = `${yyyy}.${mo}.${dd}`;
+  if (weekEl) weekEl.textContent = `${wk}/52`;
 }
 
 function tick() {
@@ -168,7 +244,11 @@ function initParticles() {
 // ── Boot ─────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  const isFriday = getState().isFriday;
   initParticles();
+  initTerminal(isFriday);
   tick();
+  tickSysReadout();
   setInterval(tick, 1000);
+  setInterval(tickSysReadout, 1000);
 });

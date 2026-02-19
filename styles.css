@@ -50,6 +50,19 @@ body {
   transition: background 1s ease;
 }
 
+/* Subtle tech grid */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 209, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 209, 0.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* Radial gradient glow in the center */
 body::before {
   content: '';
@@ -179,12 +192,38 @@ body.friday-mode h1#headline {
     0 0 80px #ff8c00;
 }
 
-#subheadline {
-  font-size: clamp(0.6rem, 1.8vw, 0.9rem);
-  letter-spacing: 0.25em;
-  color: var(--text-dim);
-  text-transform: uppercase;
+/* ── Terminal line ───────────────────────────────────────────── */
+
+.terminal-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: clamp(0.6rem, 1.5vw, 0.8rem);
+  letter-spacing: 0.1em;
+  color: var(--cyan);
+  opacity: 0.75;
+  height: 1.2em;
 }
+
+.terminal-prompt {
+  color: var(--purple);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.cursor-blink {
+  animation: cursor-flash 1s step-end infinite;
+  color: var(--cyan);
+  line-height: 1;
+}
+
+@keyframes cursor-flash {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+body.friday-mode .terminal-line { color: #ffd700; opacity: 0.8; }
+body.friday-mode .cursor-blink  { color: #ffd700; }
 
 /* ── Clock grid ──────────────────────────────────────────────── */
 
@@ -391,6 +430,43 @@ body.friday-mode .progress-fill {
   color: var(--text-dim);
   text-transform: uppercase;
 }
+
+/* ── System readout ──────────────────────────────────────────── */
+
+.sys-readout {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #ffffff04;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+}
+
+.sys-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sys-key {
+  color: var(--text-dim);
+}
+
+.sys-val {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.sys-sep {
+  color: var(--border);
+}
+
+body.friday-mode .sys-val { color: #ffd700; }
 
 /* ── Footer ──────────────────────────────────────────────────── */
 
