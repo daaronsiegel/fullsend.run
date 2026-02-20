@@ -176,19 +176,24 @@
 
   <script>
     // ── Admin login ──────────────────────────────────────────────
-    const ADMIN_PASS   = 'fullsend';           // change this
-    const ADMIN_TTL_MS = 12 * 60 * 60 * 1000; // 12-hour session
+    const ADMIN_HASH   = '40da85184fc51b20f55e5b4236534e3806e69ca1f447d7a7c90c69ba76016fdc';
+    const ADMIN_TTL_MS = 12 * 60 * 60 * 1000;
     const ADMIN_KEY    = 'fs_admin_exp';
 
     function setAdmin() {
       localStorage.setItem(ADMIN_KEY, (Date.now() + ADMIN_TTL_MS).toString());
     }
 
+    async function hashInput(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
     document.getElementById('admin-login-btn').addEventListener('click', openAdminModal);
 
-    const overlay   = document.getElementById('admin-overlay');
-    const passInput  = document.getElementById('admin-pass-input');
-    const errorMsg   = document.getElementById('admin-error');
+    const overlay  = document.getElementById('admin-overlay');
+    const passInput = document.getElementById('admin-pass-input');
+    const errorMsg  = document.getElementById('admin-error');
 
     function openAdminModal() {
       passInput.value = '';
@@ -198,8 +203,9 @@
     }
     function closeAdminModal() { overlay.style.display = 'none'; }
 
-    function attemptLogin() {
-      if (passInput.value === ADMIN_PASS) {
+    async function attemptLogin() {
+      const hash = await hashInput(passInput.value);
+      if (hash === ADMIN_HASH) {
         setAdmin();
         closeAdminModal();
         location.href = 'community.html';
