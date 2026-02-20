@@ -518,11 +518,12 @@ updateFridayClock();
 setInterval(updateFridayClock, 1000);
 </script>
 
-<!-- Firebase + board logic -->
-<script type="module">
-import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, push, onValue, remove, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+<!-- Firebase SDKs (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
+<!-- Board logic -->
+<script>
 const firebaseConfig = {
   apiKey:            "AIzaSyBHYeCayeuQvLko-nzEzYOxSt4bQ4A3fCk",
   authDomain:        "fullsend-b4fc4.firebaseapp.com",
@@ -533,9 +534,9 @@ const firebaseConfig = {
   appId:             "1:1093368252155:web:8545dc534bd82b1db4525e"
 };
 
-const app      = initializeApp(firebaseConfig);
-const db       = getDatabase(app);
-const postsRef = ref(db, 'posts');
+firebase.initializeApp(firebaseConfig);
+const db       = firebase.database();
+const postsRef = db.ref('posts');
 
 const EMOJIS        = ['🔥', '👍', '😂', '💀', '👀', '🤙', '💯'];
 const REACTIONS_KEY = 'fs_user_reactions'; // tracks this device's reactions locally
@@ -562,7 +563,7 @@ function esc(str) {
 let currentPosts = [];
 
 // ── Real-time listener ────────────────────────────────────────
-onValue(postsRef, snapshot => {
+postsRef.on('value', snapshot => {
   const data = snapshot.val();
   currentPosts = data
     ? Object.entries(data).map(([id, p]) => ({ id, ...p })).sort((a, b) => b.ts - a.ts)
@@ -671,12 +672,12 @@ function toggleReaction(postId, emoji) {
 
   all[postId] = mine;
   saveMyReactions(all);
-  set(ref(db, `posts/${postId}/reactions`), Object.keys(reactions).length ? reactions : null);
+  db.ref(`posts/${postId}/reactions`).set(Object.keys(reactions).length ? reactions : null);
 }
 
 // ── Delete (admin) ────────────────────────────────────────────
 function deletePost(id) {
-  remove(ref(db, `posts/${id}`));
+  db.ref(`posts/${id}`).remove();
 }
 
 // ── Compose ───────────────────────────────────────────────────
@@ -690,15 +691,14 @@ composeText.addEventListener('input', () => {
 submitBtn.addEventListener('click', () => {
   const text = composeText.value.trim();
   if (text.length < 2) return;
-  push(postsRef, { text, ts: Date.now() });
+  postsRef.push({ text, ts: Date.now() });
   composeText.value = '';
   submitBtn.disabled = true;
 });
 
 // ── Admin UI ──────────────────────────────────────────────────
 if (window._isAdmin) {
-  const adminNav = document.getElementById('admin-nav');
-  adminNav.style.display = 'flex';
+  document.getElementById('admin-nav').style.display = 'flex';
   document.getElementById('admin-logout').addEventListener('click', () => {
     localStorage.removeItem('fs_admin_exp');
     location.href = 'index.html';
