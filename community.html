@@ -490,51 +490,89 @@
 
 </div>
 
+<!-- Friday countdown (non-module, runs immediately) -->
 <script>
-const STORAGE_KEY = 'fullsend_community_v4';
-const EMOJIS = ['🔥', '👍', '😂', '💀', '👀', '🤙', '💯'];
-
-const SEED_POSTS = [];
-
-let posts = [];
-
-function loadPosts() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const data = JSON.parse(raw);
-      if (data && data.length > 0) return data;
-    }
-  } catch(e) {}
-  return JSON.parse(JSON.stringify(SEED_POSTS));
+function pad(n) { return String(n).padStart(2, '0'); }
+function updateFridayClock() {
+  const bar   = document.getElementById('friday-bar');
+  const label = document.getElementById('friday-label');
+  const clock = document.getElementById('friday-clock');
+  const now = new Date();
+  const day = now.getDay();
+  if (day !== 5) {
+    bar.classList.remove('active');
+    label.textContent = 'Board opens Friday 12 AM';
+    clock.innerHTML = '--<span class="colon">:</span>--<span class="colon">:</span>--';
+    return;
+  }
+  bar.classList.add('active');
+  label.textContent = 'Board closes in';
+  const end = new Date(now); end.setHours(24, 0, 0, 0);
+  const t = Math.max(0, Math.floor((end - now) / 1000));
+  clock.innerHTML =
+    `<span class="seg">${pad(Math.floor(t/3600))}</span><span class="colon">:</span>` +
+    `<span class="seg">${pad(Math.floor((t%3600)/60))}</span><span class="colon">:</span>` +
+    `<span class="seg">${pad(t%60)}</span>`;
 }
+updateFridayClock();
+setInterval(updateFridayClock, 1000);
+</script>
 
-function savePosts() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(posts)); } catch(e) {}
+<!-- Firebase + board logic -->
+<script type="module">
+import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, push, onValue, remove, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBHYeCayeuQvLko-nzEzYOxSt4bQ4A3fCk",
+  authDomain:        "fullsend-b4fc4.firebaseapp.com",
+  databaseURL:       "https://fullsend-b4fc4-default-rtdb.firebaseio.com",
+  projectId:         "fullsend-b4fc4",
+  storageBucket:     "fullsend-b4fc4.firebasestorage.app",
+  messagingSenderId: "1093368252155",
+  appId:             "1:1093368252155:web:8545dc534bd82b1db4525e"
+};
+
+const app      = initializeApp(firebaseConfig);
+const db       = getDatabase(app);
+const postsRef = ref(db, 'posts');
+
+const EMOJIS        = ['🔥', '👍', '😂', '💀', '👀', '🤙', '💯'];
+const REACTIONS_KEY = 'fs_user_reactions'; // tracks this device's reactions locally
+
+function getMyReactions() {
+  try { return JSON.parse(localStorage.getItem(REACTIONS_KEY)) || {}; } catch { return {}; }
+}
+function saveMyReactions(r) {
+  try { localStorage.setItem(REACTIONS_KEY, JSON.stringify(r)); } catch {}
 }
 
 function relTime(ts) {
   const s = Math.floor((Date.now() - ts) / 1000);
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 60)    return `${s}s ago`;
+  if (s < 3600)  return `${Math.floor(s / 60)}m ago`;
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
   return `${Math.floor(s / 86400)}d ago`;
 }
 
 function esc(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+let currentPosts = [];
+
+// ── Real-time listener ────────────────────────────────────────
+onValue(postsRef, snapshot => {
+  const data = snapshot.val();
+  currentPosts = data
+    ? Object.entries(data).map(([id, p]) => ({ id, ...p })).sort((a, b) => b.ts - a.ts)
+    : [];
+  renderFeed();
+});
 
 function renderFeed() {
   const feed = document.getElementById('feed');
-  const sorted = [...posts].sort((a, b) => b.ts - a.ts);
-
-  if (sorted.length === 0) {
+  if (currentPosts.length === 0) {
     feed.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">💬</div>
@@ -542,11 +580,8 @@ function renderFeed() {
       </div>`;
     return;
   }
-
   feed.innerHTML = '';
-  sorted.forEach((post, i) => {
-    feed.appendChild(createCard(post, i));
-  });
+  currentPosts.forEach((post, i) => feed.appendChild(createCard(post, i)));
 }
 
 function createCard(post, index) {
@@ -555,23 +590,21 @@ function createCard(post, index) {
   card.style.animationDelay = `${Math.min(index * 0.04, 0.3)}s`;
   card.dataset.id = post.id;
 
-  const reactionEntries = Object.entries(post.reactions || {}).filter(([, c]) => c > 0);
-  const userReactions = post.userReactions || [];
+  const myReactions    = getMyReactions()[post.id] || [];
+  const reactions      = post.reactions || {};
+  const reactionEntries = Object.entries(reactions).filter(([, c]) => c > 0);
 
   const reactionsHtml = reactionEntries.map(([emoji, count]) => `
-    <button class="reaction-btn${userReactions.includes(emoji) ? ' active' : ''}" data-emoji="${esc(emoji)}">
+    <button class="reaction-btn${myReactions.includes(emoji) ? ' active' : ''}" data-emoji="${esc(emoji)}">
       <span class="reaction-emoji">${emoji}</span>
       <span class="reaction-count">${count}</span>
-    </button>
-  `).join('');
+    </button>`).join('');
 
   const emojiPickerHtml = EMOJIS.map(e =>
-    `<button class="emoji-pick-btn" data-emoji="${e}">${e}</button>`
-  ).join('');
+    `<button class="emoji-pick-btn" data-emoji="${e}">${e}</button>`).join('');
 
   const deleteBtn = window._isAdmin
-    ? `<button class="admin-delete-btn" title="Delete post">✕</button>`
-    : '';
+    ? `<button class="admin-delete-btn" title="Delete post">✕</button>` : '';
 
   card.innerHTML = `
     <div class="post-meta">
@@ -591,24 +624,17 @@ function createCard(post, index) {
     card.querySelector('.admin-delete-btn').addEventListener('click', () => deletePost(post.id));
   }
 
-  // Reaction click handlers
   card.querySelectorAll('.reaction-btn').forEach(btn => {
     btn.addEventListener('click', () => toggleReaction(post.id, btn.dataset.emoji));
   });
 
-  // Add-reaction toggle
   const addBtn = card.querySelector('.add-reaction');
   const picker = card.querySelector('.emoji-picker');
-
   addBtn.addEventListener('click', e => {
     e.stopPropagation();
-    // close any other open pickers
-    document.querySelectorAll('.emoji-picker.open').forEach(p => {
-      if (p !== picker) p.classList.remove('open');
-    });
+    document.querySelectorAll('.emoji-picker.open').forEach(p => { if (p !== picker) p.classList.remove('open'); });
     picker.classList.toggle('open');
   });
-
   picker.querySelectorAll('.emoji-pick-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -624,37 +650,38 @@ document.addEventListener('click', () => {
   document.querySelectorAll('.emoji-picker.open').forEach(p => p.classList.remove('open'));
 });
 
+// ── Reactions ─────────────────────────────────────────────────
 function toggleReaction(postId, emoji) {
-  const post = posts.find(p => p.id === postId);
+  const post = currentPosts.find(p => p.id === postId);
   if (!post) return;
 
-  if (!post.reactions) post.reactions = {};
-  if (!post.userReactions) post.userReactions = [];
+  const all       = getMyReactions();
+  const mine      = [...(all[postId] || [])];
+  const reactions = { ...(post.reactions || {}) };
+  const idx       = mine.indexOf(emoji);
 
-  const idx = post.userReactions.indexOf(emoji);
   if (idx !== -1) {
-    post.userReactions.splice(idx, 1);
-    post.reactions[emoji] = Math.max(0, (post.reactions[emoji] || 1) - 1);
-    if (post.reactions[emoji] === 0) delete post.reactions[emoji];
+    mine.splice(idx, 1);
+    reactions[emoji] = Math.max(0, (reactions[emoji] || 1) - 1);
+    if (reactions[emoji] === 0) delete reactions[emoji];
   } else {
-    post.userReactions.push(emoji);
-    post.reactions[emoji] = (post.reactions[emoji] || 0) + 1;
+    mine.push(emoji);
+    reactions[emoji] = (reactions[emoji] || 0) + 1;
   }
 
-  savePosts();
-
-  // Replace just this card
-  const oldCard = document.querySelector(`[data-id="${postId}"]`);
-  if (oldCard) {
-    const newCard = createCard(post, 0);
-    newCard.style.animation = 'none';
-    oldCard.replaceWith(newCard);
-  }
+  all[postId] = mine;
+  saveMyReactions(all);
+  set(ref(db, `posts/${postId}/reactions`), Object.keys(reactions).length ? reactions : null);
 }
 
-// Compose
+// ── Delete (admin) ────────────────────────────────────────────
+function deletePost(id) {
+  remove(ref(db, `posts/${id}`));
+}
+
+// ── Compose ───────────────────────────────────────────────────
 const composeText = document.getElementById('compose-text');
-const submitBtn = document.getElementById('submit-btn');
+const submitBtn   = document.getElementById('submit-btn');
 
 composeText.addEventListener('input', () => {
   submitBtn.disabled = composeText.value.trim().length < 2;
@@ -663,84 +690,12 @@ composeText.addEventListener('input', () => {
 submitBtn.addEventListener('click', () => {
   const text = composeText.value.trim();
   if (text.length < 2) return;
-
-  const post = {
-    id: 'post-' + Date.now(),
-    text,
-    ts: Date.now(),
-    reactions: {},
-    userReactions: [],
-  };
-
-  posts.unshift(post);
-  savePosts();
-
+  push(postsRef, { text, ts: Date.now() });
   composeText.value = '';
   submitBtn.disabled = true;
-
-  renderFeed();
 });
 
-function deletePost(id) {
-  posts = posts.filter(p => p.id !== id);
-  savePosts();
-  const card = document.querySelector(`[data-id="${id}"]`);
-  if (card) {
-    card.style.transition = 'opacity 0.2s, transform 0.2s';
-    card.style.opacity = '0';
-    card.style.transform = 'translateX(12px)';
-    setTimeout(() => { card.remove(); if (!posts.length) renderFeed(); }, 200);
-  }
-}
-
-// ── Friday Countdown ──────────────────────────────────────────
-function pad(n) { return String(n).padStart(2, '0'); }
-
-function updateFridayClock() {
-  const bar    = document.getElementById('friday-bar');
-  const label  = document.getElementById('friday-label');
-  const clock  = document.getElementById('friday-clock');
-
-  const now = new Date();
-  const day = now.getDay(); // 0=Sun … 5=Fri … 6=Sat
-
-  if (day !== 5) {
-    // Not Friday — clock stays dormant
-    bar.classList.remove('active');
-    label.textContent = 'Board opens Friday 12 AM';
-    clock.innerHTML = '--<span class="colon">:</span>--<span class="colon">:</span>--';
-    return;
-  }
-
-  // It's Friday — count down to Saturday 12:00:00 AM
-  bar.classList.add('active');
-  label.textContent = 'Board closes in';
-
-  const endOfFriday = new Date(now);
-  endOfFriday.setHours(24, 0, 0, 0); // next midnight (Saturday 00:00:00)
-
-  const remaining = Math.max(0, endOfFriday - now);
-  const totalSec  = Math.floor(remaining / 1000);
-  const h  = Math.floor(totalSec / 3600);
-  const m  = Math.floor((totalSec % 3600) / 60);
-  const s  = totalSec % 60;
-
-  clock.innerHTML =
-    `<span class="seg">${pad(h)}</span>` +
-    `<span class="colon">:</span>` +
-    `<span class="seg">${pad(m)}</span>` +
-    `<span class="colon">:</span>` +
-    `<span class="seg">${pad(s)}</span>`;
-}
-
-updateFridayClock();
-setInterval(updateFridayClock, 1000);
-
-// Boot
-posts = loadPosts();
-renderFeed();
-
-// Admin UI
+// ── Admin UI ──────────────────────────────────────────────────
 if (window._isAdmin) {
   const adminNav = document.getElementById('admin-nav');
   adminNav.style.display = 'flex';
